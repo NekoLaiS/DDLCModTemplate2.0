@@ -462,9 +462,9 @@ screen navigation():
             if main_menu:
 
                 if persistent.playthrough == 1:
-                    textbutton _("ŔŗñĮ¼»ŧþŀÂŻŕěōì«") action If(persistent.playername, true=Start(), false=Show(screen="name_input", message="Please enter your name", ok_action=Function(FinishEnterName)))
+                    textbutton _("ŔŗñĮ¼»ŧþŀÂŻŕěōì«") action If(persistent.playername, true=Start(), false=Show(screen="name_input", message=_("Please enter your name"), ok_action=Function(FinishEnterName)))
                 else:
-                    textbutton _("New Game") action If(persistent.playername, true=Start(), false=Show(screen="name_input", message="Please enter your name", ok_action=Function(FinishEnterName)))
+                    textbutton _("New Game") action If(persistent.playername, true=Start(), false=Show(screen="name_input", message=_("Please enter your name"), ok_action=Function(FinishEnterName)))
 
             else:
 
@@ -493,7 +493,7 @@ screen navigation():
             if renpy.variant("pc"):
 
                 ## Help isn't necessary or relevant to mobile devices.
-                textbutton _("Help") action [Help("README.html"), Show(screen="dialog", message="The help file has been opened in your browser.", ok_action=Hide("dialog"))]
+                textbutton _("Help") action [Help("README.html"), Show(screen="dialog", message=_("The help file has been opened in your browser."), ok_action=Hide("dialog"))]
 
                 ## The quit button is banned on iOS and unnecessary on Android.
                 textbutton _("Quit") action Quit(confirm=not main_menu)
@@ -816,10 +816,10 @@ screen load():
 init python:
     def FileActionMod(name, page=None, **kwargs):
         if persistent.playthrough == 1 and not persistent.deleted_saves and renpy.current_screen().screen_name[0] == "load" and FileLoadable(name):
-            return Show(screen="dialog", message="File error: \"characters/sayori.chr\"\n\nThe file is missing or corrupt.",
-                ok_action=Show(screen="dialog", message="The save file is corrupt. Starting a new game.", ok_action=Function(renpy.full_restart, label="start")))
+            return Show(screen="dialog", message=_("File error: \"characters/sayori.chr\"\n\nThe file is missing or corrupt."),
+                ok_action=Show(screen="dialog", message=_("The save file is corrupt. Starting a new game."), ok_action=Function(renpy.full_restart, label="start")))
         elif persistent.playthrough == 3 and renpy.current_screen().screen_name[0] == "save":
-            return Show(screen="dialog", message="There's no point in saving anymore.\nDon't worry, I'm not going anywhere.", ok_action=Hide("dialog"))
+            return Show(screen="dialog", message=_("There's no point in saving anymore.\nDon't worry, I'm not going anywhere."), ok_action=Hide("dialog"))
         else:
             return FileAction(name)
 
@@ -993,14 +993,14 @@ screen preferences():
                         label _("Extra Settings")
                         textbutton _("Uncensored Mode") action If(persistent.uncensored_mode, 
                             ToggleField(persistent, "uncensored_mode"), 
-                            Show("confirm", message="Are you sure you want to turn on Uncensored Mode?\nDoing so will enable more adult/sensitive\ncontent in your playthrough.\n\nThis setting will be dependent on the modder if\nthey programmed these checks in their story.", 
+                            Show("confirm", message=_("Are you sure you want to turn on Uncensored Mode?\nDoing so will enable more adult/sensitive\ncontent in your playthrough.\n\nThis setting will be dependent on the modder if\nthey programmed these checks in their story."), 
                                 yes_action=[Hide("confirm"), ToggleField(persistent, "uncensored_mode")],
                                 no_action=Hide("confirm")
                             ))
                         textbutton _("Let's Play Mode") action If(persistent.lets_play, 
                             ToggleField(persistent, "lets_play"),
                             [ToggleField(persistent, "lets_play"), Show("dialog", 
-                                message="You have enabled Let's Play Mode.\nThis mode allows you to skip content that\ncontains sensitive information or apply alternative\nstory options.\n\nThis setting will be dependent on the modder\nif they programmed these checks in their story.", 
+                                message=_("You have enabled Let's Play Mode.\nThis mode allows you to skip content that\ncontains sensitive information or apply alternative\nstory options.\n\nThis setting will be dependent on the modder\nif they programmed these checks in their story."), 
                                 ok_action=Hide("dialog")
                             )])
                             
@@ -1063,28 +1063,38 @@ screen preferences():
                         textbutton _("Mute All"):
                             action Preference("all mute", "toggle")
                             style "mute_all_button"
-
             if enable_languages:
-                hbox:
-                    style_prefix "radio"
-                    if extra_settings:
-                        xoffset 15   
-                    vbox:
-                        label _("Language")
+                #hbox:
+                    #style_prefix "radio"
+                    #if extra_settings:
+                    #    xoffset 15   
+                    #vbox:
+                        #label _("Language")
 
-                        hbox:
-                            viewport:
-                                ysize 110
-                                has vbox
+                        #hbox:
+                            #viewport:
+                                #ysize 110
+                                #has vbox
                                 
-                                python:
-                                    lang_list = list(renpy.known_languages())
-                                    lang_list.append('english')
-                                    lang_list = sorted(set(lang_list))
+                                #python:
+                                #    lang_list = list(renpy.known_languages())
+                                #    lang_list.append('english')
+                                #   lang_list = sorted(set(lang_list))
 
-                                for lang in lang_list:
-                                    textbutton lang.capitalize() action If(lang == 'english', Language(None), Language(lang))
-                            
+                                #for lang in lang_list:
+                                #   textbutton lang.capitalize() action If(lang == 'english', Language(None), Language(lang))
+
+                vbox:
+                    style_prefix "radio"
+                    label _("Language")
+                    for i in lang_dict.values():
+                        python:
+                            if type(i) == tuple:
+                                i = i[0] # Fix for a Ren'Py type bug
+                        if not i.wip or config.developer:
+                            textbutton i.name sensitive Language(i.code) action [Language(i.code)] 
+            
+                                  
     text "v[config.version]":
                 xalign 1.0 yalign 1.0
                 xoffset -10 yoffset -10
